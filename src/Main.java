@@ -7,6 +7,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.net.Socket;
+
 public class Main extends Application {
 
     private Label typeLabel, operationLabel;
@@ -23,6 +25,8 @@ public class Main extends Application {
 
     public void start(Stage primaryStage) throws Exception {
 
+        //SOCKET
+        //Socket socket = new Socket("localhost", 4402);
         //COMPONENTS
         container = new Pane();
         typeLabel = new Label("Type of the tree: ");
@@ -61,8 +65,12 @@ public class Main extends Application {
         //STYLE
 
         typeLabel.setStyle("-fx-font-size: 20; -fx-font-family: 'Berlin Sans FB'");
-        operationLabel.setStyle("-fx-font-size: 20");
+        operationLabel.setStyle("-fx-font-size: 20; -fx-font-family: 'Berlin Sans FB'");
+        IntegerType.setStyle("-fx-font-size: 16;");
+        StringType.setStyle("-fx-font-size: 16;");
+        DoubleType.setStyle("-fx-font-size: 16;");
 
+        operationVbox.setStyle("-fx-font-size: 14");
         mainVBox.setSpacing(20);
         argumentTextField.setMaxWidth(100);
 
@@ -72,6 +80,21 @@ public class Main extends Application {
         Scene scene = new Scene(container);
         primaryStage.setScene(scene);
         primaryStage.show();
+
+    }
+
+    public static void main(String[] args) {
+        Tree<Integer> t = new Tree<>(3);
+        t.addElement(4);
+        t.addElement(5);
+        t.addElement(6);
+        t.addElement(7);
+        t.addElement(8);
+        t.addElement(9);
+        t.addElement(0);
+        System.out.println(t.getRoot().getValue(0));
+        System.out.println(t.getRoot().getValue(1));
+        System.out.println(t.getRoot().getValue(2));
 
     }
 }
