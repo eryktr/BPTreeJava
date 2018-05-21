@@ -7,25 +7,32 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 
 public class Main extends Application {
+
+    private static Socket socket;
+    private static PrintWriter out;
+    private static BufferedReader in;
+    private static BufferedReader sysIn;
 
     private Label typeLabel, operationLabel;
     private ToggleGroup types;
     private RadioButton IntegerType, StringType, DoubleType;
     private Button createTreeButton, addButton, removeButton, searchButton;
-    private TextField argumentTextField;
+    private TextField argumentTextField, sizeTextField;
     private HBox mainHBox;
     private Pane container;
     private VBox mainVBox, typeVbox, operationVbox;
     private StackPane drawingPane;
 
 
-
     public void start(Stage primaryStage) throws Exception {
 
-        //SOCKET
         //Socket socket = new Socket("localhost", 4402);
         //COMPONENTS
         container = new Pane();
@@ -40,6 +47,7 @@ public class Main extends Application {
         removeButton = new Button("remove");
         searchButton = new Button("search");
         argumentTextField = new TextField();
+        sizeTextField = new TextField("size");
         mainHBox = new HBox();
         mainVBox = new VBox();
         typeVbox = new VBox();
@@ -51,7 +59,7 @@ public class Main extends Application {
         container.getChildren().addAll(mainHBox);
         mainHBox.getChildren().addAll(mainVBox, drawingPane);
         mainVBox.getChildren().addAll(typeVbox, operationVbox);
-        typeVbox.getChildren().addAll(typeLabel, IntegerType, StringType, DoubleType, createTreeButton);
+        typeVbox.getChildren().addAll(typeLabel, IntegerType, StringType, DoubleType, sizeTextField, createTreeButton);
         operationVbox.getChildren().addAll(operationLabel, argumentTextField, addButton, removeButton, searchButton);
 
         //FUNCTIONALITY
@@ -63,18 +71,38 @@ public class Main extends Application {
         argumentTextField.setDisable(true);
 
         //STYLE
-
+        types.selectToggle(IntegerType);
         typeLabel.setStyle("-fx-font-size: 20; -fx-font-family: 'Berlin Sans FB'");
         operationLabel.setStyle("-fx-font-size: 20; -fx-font-family: 'Berlin Sans FB'");
         IntegerType.setStyle("-fx-font-size: 16;");
         StringType.setStyle("-fx-font-size: 16;");
         DoubleType.setStyle("-fx-font-size: 16;");
-
         operationVbox.setStyle("-fx-font-size: 14");
         mainVBox.setSpacing(20);
         argumentTextField.setMaxWidth(100);
-
         drawingPane.setPrefSize(640, 400);
+
+        //EVENTS
+        createTreeButton.setOnAction( event -> {
+            String type;
+            String size = sizeTextField.getText();
+            if(types.getSelectedToggle() == IntegerType) { type = "Integer"; }
+            else if(types.getSelectedToggle() == StringType) { type = "String"; }
+            else { type = "Double"; }
+            out.println(type + " " + size);
+            try { System.out.println(in.readLine()); }
+            catch (IOException ex) {}
+            createTreeButton.setDisable(true);
+            sizeTextField.setDisable(true);
+            IntegerType.setDisable(true);
+            StringType.setDisable(true);
+            DoubleType.setDisable(true);
+            argumentTextField.setDisable(false);
+            addButton.setDisable(false);
+            removeButton.setDisable(false);
+            searchButton.setDisable(false);
+
+        });
 
         //DISPLAYING
         Scene scene = new Scene(container);
@@ -84,17 +112,19 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
-        Tree<Integer> t = new Tree<>(3);
-        t.addElement(4);
-        t.addElement(5);
-        t.addElement(6);
-        t.addElement(7);
-        t.addElement(8);
-        t.addElement(9);
-        t.addElement(0);
-        System.out.println(t.getRoot().getValue(0));
-        System.out.println(t.getRoot().getValue(1));
-        System.out.println(t.getRoot().getValue(2));
+        try {
+            socket = new Socket("localhost", 5703);
+            out = new PrintWriter(socket.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            sysIn = new BufferedReader(new InputStreamReader(System.in));
+
+            launch(args);
+
+        }
+        catch (IOException e) {
+            System.out.println("error from client side");
+        }
+
 
     }
 }

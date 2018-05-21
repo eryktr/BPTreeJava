@@ -1,3 +1,9 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
@@ -110,6 +116,43 @@ public class Tree<T> {
 
     Node getRoot() {
         return root;
+    }
+
+    public static void main(String[] args) {
+        Tree t;
+        try {
+            ServerSocket serverSocket = new ServerSocket(5703);
+            Socket client = serverSocket.accept();
+            PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+
+            String inputLine;
+            while((inputLine = in.readLine()) != null) {
+                String[] params = inputLine.split(" ");
+                if (params[0].equals("Integer") || params[0].equals("String") || params[0].equals("Double")) {
+                    int size = Integer.parseInt(params[1]);
+                    if(params[0].equals("Integer")) {
+                        t = new Tree<Integer>(size);
+                        out.println("Integer tree created");
+                    }
+                    else if(params[0].equals("String")) {
+                        t = new Tree<String>(size);
+                        out.println("String tree created");
+                    }
+                    else {
+                        t = new Tree<Double>(size);
+                        out.println("Double tree created");
+                    }
+                }
+                else if(params[0].equals("add") || params[0].equals("remove") || params[0].equals("search")) {
+
+                }
+            }
+        }
+        catch (IOException e) {
+            System.out.println("error from server side");
+        }
+
     }
 
 
