@@ -31,7 +31,6 @@ public class Main extends Application {
     private HBox mainHBox;
     private Pane container;
     private VBox mainVBox, typeVbox, operationVbox;
-    private StackPane drawingPane;
 
 
 
@@ -57,12 +56,11 @@ public class Main extends Application {
         mainVBox = new VBox();
         typeVbox = new VBox();
         operationVbox = new VBox();
-        drawingPane = new StackPane();
 
         //ADDING CHILDREN
         types.getToggles().addAll(IntegerType, StringType, DoubleType);
         container.getChildren().addAll(mainHBox);
-        mainHBox.getChildren().addAll(mainVBox, drawingPane);
+        mainHBox.getChildren().addAll(mainVBox);
         mainVBox.getChildren().addAll(typeVbox, operationVbox);
         typeVbox.getChildren().addAll(typeLabel, IntegerType, StringType, DoubleType, sizeTextField, createTreeButton);
         operationVbox.getChildren().addAll(operationLabel, argumentTextField, addButton, removeButton, searchButton);
@@ -85,7 +83,6 @@ public class Main extends Application {
         operationVbox.setStyle("-fx-font-size: 14");
         mainVBox.setSpacing(20);
         argumentTextField.setMaxWidth(100);
-        drawingPane.setPrefSize(640, 400);
 
         //EVENTS
         createTreeButton.setOnAction( event -> {

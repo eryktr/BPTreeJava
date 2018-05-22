@@ -31,7 +31,8 @@ public class Tree<T> {
         }
         values.add(elementToAdd);
         root = nodify(values);
-        out.println(elementToAdd + "added");
+        out.println(elementToAdd + " ADDED SUCCESSFULLY");
+        print(root, "");
     }
 
     public void removeElement(T elementToRemove) {
@@ -41,15 +42,30 @@ public class Tree<T> {
         }
         values.remove(elementToRemove);
         root = nodify(values);
-        out.println(elementToRemove + " removed.");
+        out.println(elementToRemove + " REMOVED SUCCESSFULLY.");
+        print(root, "");
     }
 
     public void search(T elementToFind) {
         if(values.contains(elementToFind)) {
-            out.println("The tree contains " + elementToFind);
+            out.println("THE TREE CONTAINS " + elementToFind);
         }
         else {
-            out.println("The tree does not contain " + elementToFind);
+            out.println("The TREE DOES NOT CONTAIN " + elementToFind);
+        }
+    }
+
+    public void print(Node arg, String indentation) {
+        String outputLine = indentation + "[|";
+        for(Pair<T, Node> pair : (ArrayList<Pair<T, Node>>)arg.getFields()) {
+            outputLine += (pair.getFirst() +"|");
+        }
+        outputLine += "]";
+        out.println(outputLine);
+        for(Pair<T, Node> pair : (ArrayList<Pair<T, Node>>)arg.getFields()) {
+            if(pair.getSecond() != null) {
+                print(pair.getSecond(), indentation + "     ");
+            }
         }
     }
 
@@ -121,7 +137,7 @@ public class Tree<T> {
 
     Node findPointer(ArrayList<Node<T>> previousNodes, T valueToInsert) {
         for(int i = 0; i < previousNodes.size(); i++) {
-            if(i < previousNodes.get(i).getCurrentNumOfElems() && previousNodes.get(i).getValue(0) == valueToInsert) {
+            if(previousNodes.get(i).getCurrentNumOfElems() > 0 && previousNodes.get(i).getValue(0) == valueToInsert) {
                 return previousNodes.get(i);
             }
         }
@@ -191,7 +207,10 @@ public class Tree<T> {
                     }
 
                     else if(currentType.equals("String")) {
-                        String value = params[1];
+                        String value = "";
+                        for(int i = 1; i < params.length; i++) {
+                            value += " "+params[i];
+                        }
                         performOperation(t, params[0], value);
                     }
 

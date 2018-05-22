@@ -18,6 +18,9 @@ public class Node<T> {
         fields.add(new Pair<T, Node>(value, pointer));
         currentNumOfElems++;
     }
+    public ArrayList<Pair<T, Node>> getFields() {
+        return fields;
+    }
 
     public T getValue(int index) {
         return fields.get(index).getFirst();
