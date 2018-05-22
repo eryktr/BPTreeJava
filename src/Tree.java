@@ -8,6 +8,12 @@ import java.util.ArrayList;
 import java.util.TreeSet;
 
 public class Tree<T> {
+    private static String currentType;
+    private static ServerSocket serverSocket;
+    private static Socket client;
+    private static PrintWriter out;
+    private static BufferedReader in;
+
     private final int maxNumOfElems;
     private TreeSet<T> values;
     private Node root;
@@ -20,20 +26,41 @@ public class Tree<T> {
 
     public void addElement(T elementToAdd) {
         if (values.contains(elementToAdd)) {
-            System.out.println("The value is already in the tree.");
+            out.println("The value is already in the tree.");
             return;
         }
         values.add(elementToAdd);
         root = nodify(values);
-        System.out.println(elementToAdd + "added");
+        out.println(elementToAdd + "added");
+    }
+
+    public void removeElement(T elementToRemove) {
+        if(!values.contains(elementToRemove)) {
+            out.println("Element is not in the tree.");
+            return;
+        }
+        values.remove(elementToRemove);
+        root = nodify(values);
+        out.println(elementToRemove + " removed.");
+    }
+
+    public void search(T elementToFind) {
+        if(values.contains(elementToFind)) {
+            out.println("The tree contains " + elementToFind);
+        }
+        else {
+            out.println("The tree does not contain " + elementToFind);
+        }
     }
 
     public Node nodify(TreeSet<T> values) {
+        if(values.size() == 0) {
+            return null;
+        }
         int numOfNodesToCreate = (int)Math.ceil((double)values.size() / maxNumOfElems);
         ArrayList<Node<T>> previousLevel = new ArrayList<>();
         TreeSet<T> valuesToInsert = new TreeSet<>(values);
         do {
-            System.out.println("prev level originally null? " + (previousLevel.isEmpty()) );
             ArrayList<Node<T>> newNodes = new ArrayList<>();
             for (int i = 0; i < numOfNodesToCreate; i++) {
                 Node<T> newNode = new Node(maxNumOfElems);
@@ -41,7 +68,6 @@ public class Tree<T> {
             }
             populateNodes(newNodes, previousLevel, valuesToInsert);
             previousLevel = new ArrayList<>(newNodes);
-            System.out.println("And now? "+ (previousLevel.isEmpty()));
             valuesToInsert = updateValuesToInsert(previousLevel);
             numOfNodesToCreate = (numOfNodesToCreate == 1) ? 0 : (int)Math.ceil((double)valuesToInsert.size() / maxNumOfElems);
         } while (numOfNodesToCreate >= 1);
@@ -71,7 +97,6 @@ public class Tree<T> {
                     valuesToInsert.remove(valueToInsert);
                 }
                 else {
-                    System.out.println("They entered me");
                     Node<T> pointer = findPointer(previousNodes, valueToInsert);
                     targetNode.addField(valueToInsert, pointer);
                     availableNumOfElems--;
@@ -118,13 +143,25 @@ public class Tree<T> {
         return root;
     }
 
+    public static void performOperation(Tree t, String operation, Object value) {
+        if (operation.equals("add")) {
+            t.addElement(value);;
+        }
+        else if(operation.equals("remove")) {
+            t.removeElement(value);
+        }
+        else {
+            t.search(value);
+        }
+    }
+
     public static void main(String[] args) {
-        Tree t;
+        Tree t = null;
         try {
-            ServerSocket serverSocket = new ServerSocket(5703);
-            Socket client = serverSocket.accept();
-            PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            serverSocket = new ServerSocket(5703);
+            client = serverSocket.accept();
+            out = new PrintWriter(client.getOutputStream(), true);
+            in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
             String inputLine;
             while((inputLine = in.readLine()) != null) {
@@ -133,28 +170,41 @@ public class Tree<T> {
                     int size = Integer.parseInt(params[1]);
                     if(params[0].equals("Integer")) {
                         t = new Tree<Integer>(size);
+                        currentType = "Integer";
                         out.println("Integer tree created");
                     }
                     else if(params[0].equals("String")) {
                         t = new Tree<String>(size);
+                        currentType = "String";
                         out.println("String tree created");
                     }
                     else {
                         t = new Tree<Double>(size);
+                        currentType = "Double";
                         out.println("Double tree created");
                     }
                 }
                 else if(params[0].equals("add") || params[0].equals("remove") || params[0].equals("search")) {
+                    if(currentType.equals("Integer")) {
+                        Integer value = Integer.parseInt(params[1]);
+                        performOperation(t, params[0], value);
+                    }
 
+                    else if(currentType.equals("String")) {
+                        String value = params[1];
+                        performOperation(t, params[0], value);
+                    }
+
+                    else {
+                        Double value = Double.parseDouble(params[1]);
+                        performOperation(t, params[0], value);
+                    }
                 }
             }
         }
         catch (IOException e) {
             System.out.println("error from server side");
         }
-
     }
-
-
 }
 

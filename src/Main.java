@@ -19,6 +19,9 @@ public class Main extends Application {
     private static PrintWriter out;
     private static BufferedReader in;
     private static BufferedReader sysIn;
+    private static ServerOutputListener listener;
+
+    private static String currentType;
 
     private Label typeLabel, operationLabel;
     private ToggleGroup types;
@@ -29,6 +32,8 @@ public class Main extends Application {
     private Pane container;
     private VBox mainVBox, typeVbox, operationVbox;
     private StackPane drawingPane;
+
+
 
 
     public void start(Stage primaryStage) throws Exception {
@@ -89,9 +94,10 @@ public class Main extends Application {
             if(types.getSelectedToggle() == IntegerType) { type = "Integer"; }
             else if(types.getSelectedToggle() == StringType) { type = "String"; }
             else { type = "Double"; }
+            currentType = type;
             out.println(type + " " + size);
-            try { System.out.println(in.readLine()); }
-            catch (IOException ex) {}
+            //try { System.out.println(in.readLine()); }
+            //catch (IOException ex) {}
             createTreeButton.setDisable(true);
             sizeTextField.setDisable(true);
             IntegerType.setDisable(true);
@@ -101,7 +107,27 @@ public class Main extends Application {
             addButton.setDisable(false);
             removeButton.setDisable(false);
             searchButton.setDisable(false);
+        });
 
+        addButton.setOnAction(event -> {
+            String value = argumentTextField.getText();
+            String request;
+            request = "add " + value;
+            out.println(request);
+        });
+
+        removeButton.setOnAction(event -> {
+            String value = argumentTextField.getText();
+            String request;
+            request = "remove " + value;
+            out.println(request);
+        });
+
+        searchButton.setOnAction(event -> {
+            String value = argumentTextField.getText();
+            String request;
+            request = "search " + value;
+            out.println(request);
         });
 
         //DISPLAYING
@@ -111,12 +137,21 @@ public class Main extends Application {
 
     }
 
+    public void stop() {
+        if(listener != null) {
+            listener.disable();
+        }
+    }
+
+
     public static void main(String[] args) {
         try {
             socket = new Socket("localhost", 5703);
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             sysIn = new BufferedReader(new InputStreamReader(System.in));
+            listener = new ServerOutputListener(in);
+            listener.start();
 
             launch(args);
 
