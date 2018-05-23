@@ -1,6 +1,9 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 
+/**
+ * This Thread class listens to the output of the server and displays it.
+ */
 public class ServerOutputListener extends  Thread {
 
     private boolean continueListening = true;
